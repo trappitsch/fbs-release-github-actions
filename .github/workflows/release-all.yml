@@ -4,7 +4,7 @@ on:
     tags:
     - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
-name: Release Ubuntu
+name: Release Multi Platform
 
 jobs:
   build-linux:
@@ -27,7 +27,7 @@ jobs:
           draft: false
           prerelease: false
       - name: Write upload path to file
-        run: echo ${{ steps.create_release.outputs.upload_url }} > path.txt
+        run: echo "${{ steps.create_release.outputs.upload_url }}" > path.txt
       - name: Store upload path in artifact
         uses: actions/upload-artifact@v1
         with:
