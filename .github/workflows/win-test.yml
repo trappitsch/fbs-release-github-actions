@@ -1,0 +1,10 @@
+name: Win32Sample GitHub Releaseon:
+  push:
+    tags:
+      - 'v*'jobs:
+  create_release:
+    name: Create GitHub Release
+    runs-on: windows-2019    steps:
+      - name: Install 7Zip PowerShell Module
+        shell: powershell
+        run: Install-Module 7Zip4PowerShell -Force -Verbose
