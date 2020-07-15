@@ -1,11 +1,10 @@
-name: Release Windows
-
 on:
   push:
-    branches: [master]
     # Sequence of patterns matched against refs/tags
 #    tags:
-#    - 'none-v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+#    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+name: Release test
 
 jobs:
   build:
@@ -17,6 +16,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+          sudo apt-get install ruby ruby-dev rubygems build-essential
+          sudo gem install --no-document fpm
+          fpm --version
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
@@ -46,6 +50,6 @@ jobs:
 #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #        with:
 #          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-#          asset_path: target/fbs_tutorial_app.dmg
-#          asset_name: fbs_tutorial_app.dmg
-#          asset_content_type: application/dmg
+#          asset_path: target/fbs_tutorial_app.deb
+#          asset_name: fbs_tutorial_app.deb
+#          asset_content_type: application/deb
