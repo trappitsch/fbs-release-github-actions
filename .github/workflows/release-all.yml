@@ -24,15 +24,10 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
+          # body: ""  # release message, alternative to body_path
+          body_path: release_text.md  # uncomment if not used
           draft: false
           prerelease: false
-      - name: Write upload path to file
-        run: echo "${{ steps.create_release.outputs.upload_url }}" > path.txt
-      - name: Store upload path in artifact
-        uses: actions/upload-artifact@v1
-        with:
-          name: release-info
-          path: path.txt
       - name: Install fpm (required for fbs)
         run: |
           sudo apt-get install ruby ruby-dev rubygems build-essential
@@ -50,16 +45,14 @@ jobs:
         run: |
           fbs freeze
           fbs installer
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: target/fbs_tutorial_app.deb
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: target/fbs_tutorial_app.deb
           asset_name: fbs_tutorial_app.deb
-          asset_content_type: application/deb
+          tag: ${{ github.ref }}
+          overwrite: true
 
   build-macos:
     name: Upload Release Asset macOS
@@ -82,16 +75,6 @@ jobs:
         run: |
           fbs freeze
           fbs installer
-      - name: Get upload path for release from artifact
-        uses: actions/download-artifact@v1
-        with:
-          name: release-info
-      - name: Read path for asset upload
-        run: |
-          path=`cat release-info/path.txt`
-          echo "::set-env name=UPLOAD_URL::$path"
-      - name: Echo upload url
-        run: echo $UPLOAD_URL
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
@@ -100,13 +83,33 @@ jobs:
           asset_name: fbs_tutorial_app.dmg
           tag: ${{ github.ref }}
           overwrite: true
-#      - name: Upload Release Asset
-#        id: upload-release-asset
-#        uses: actions/upload-release-asset@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          upload_url: $UPLOAD_URL
-#          asset_path: target/fbs_tutorial_app.dmg
-#          asset_name: fbs_tutorial_app.dmg
-#          asset_content_type: application/dmg
+
+  build-windows:
+    name: Upload Release Asset
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        python-version: [3.6]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run fbs and freeze application
+        run: |
+          fbs freeze
+          fbs installer
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: target/fbs_tutorial_appSetup.exe
+          asset_name: fbs_tutorial_appSetup.exe
+          tag: ${{ github.ref }}
+          overwrite: true
