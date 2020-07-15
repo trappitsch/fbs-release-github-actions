@@ -2,5 +2,5 @@
     "app_name": "fbs_tutorial_app",
     "author": "Reto",
     "main_module": "src/main/python/main.py",
-    "version": "0.0.2"
+    "version": "0.0.3"
 }
