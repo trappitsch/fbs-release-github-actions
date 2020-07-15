@@ -17,17 +17,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
-          uses: actions/setup-python@v2
-          with:
-            python-version: ${{ matrix.python-version }}
-            - name: Install dependencies
-              run: |
-                python -m pip install --upgrade pip
-                pip install -r requirements.txt
-            - name: Run fbs and freeze application
-              run: |
-                fbs freeze
-                fbs installer
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run fbs and freeze application
+        run: |
+          fbs freeze
+          fbs installer
 #      - name: Create Release
 #        id: create_release
 #        uses: actions/create-release@v1
