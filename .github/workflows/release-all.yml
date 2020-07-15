@@ -1,14 +1,14 @@
 on:
   push:
     # Sequence of patterns matched against refs/tags
-#    tags:
-#    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+    tags:
+    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
 name: Release Ubuntu
 
 jobs:
   build-linux:
-    name: Upload Release Asset Ubuntu
+    name: Create Release and Upload Asset Ubuntu
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -16,7 +16,24 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Install dependencies
+      - name: Create Release  # Creates the release, assets will be added after building
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Write upload path to file
+        run: echo ${{ steps.create_release.outputs.upload_url }} > release-info/path.txt
+      - name: Store upload path in artifact
+        uses: actions/upload-artifact@v1
+          with:
+            name: release-info
+            path: path.txt
+      - name: Install fpm (required for fbs)
         run: |
           sudo apt-get install ruby ruby-dev rubygems build-essential
           sudo gem install --no-document fpm
@@ -25,37 +42,27 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
+      - name: Install python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Run fbs and freeze application
+      - name: Run fbs
         run: |
           fbs freeze
           fbs installer
-#      - name: Create Release
-#        id: create_release
-#        uses: actions/create-release@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          tag_name: ${{ github.ref }}
-#          release_name: Release ${{ github.ref }}
-#          draft: false
-#          prerelease: false
-#      - name: Upload Release Asset
-#        id: upload-release-asset
-#        uses: actions/upload-release-asset@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-#          asset_path: target/fbs_tutorial_app.deb
-#          asset_name: fbs_tutorial_app.deb
-#          asset_content_type: application/deb
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: target/fbs_tutorial_app.deb
+          asset_name: fbs_tutorial_app.deb
+          asset_content_type: application/deb
 
   build-macos:
-    name: Upload Release Asset
+    name: Upload Release Asset macOS
     runs-on: macos-latest
     strategy:
       matrix:
@@ -67,11 +74,28 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
+      - name: Install python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Run fbs and freeze application
+      - name: Run fbs
         run: |
           fbs freeze
           fbs installer
+      - name: Get upload path for release from artifact
+          uses: actions/download-artifact@v1
+          with:
+            name: release-info
+      - name: Upload Release Asset
+        run: |
+          path=`cat release-info/path.txt`
+          echo $path
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: $path
+          asset_path: target/fbs_tutorial_app.dmg
+          asset_name: fbs_tutorial_app.dmg
+          asset_content_type: application/dmg
