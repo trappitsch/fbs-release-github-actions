@@ -89,7 +89,7 @@ jobs:
       - name: Read path for asset upload
         run: |
           path=`cat release-info/path.txt`
-          echo '::set-env name=UPLOAD_URL::$path'
+          echo "::set-env name=UPLOAD_URL::$path"
       - name: Echo upload url
         run: echo $UPLOAD_URL
       - name: Upload Release Asset
