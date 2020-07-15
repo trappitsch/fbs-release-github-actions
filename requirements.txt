@@ -1,0 +1,4 @@
+bump2version
+fbs
+requests
+PyQt5==5.9.2

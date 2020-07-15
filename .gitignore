@@ -1,0 +1,18 @@
+## Editors ##
+# PyCharm
+.idea
+
+# ST3
+*.sublime-project
+*.sublime-workspace
+
+## fbs ##
+target/
+
+## temporary files ##
+*.pyc
+
+## Virtual Environments ##
+venv
+.venv
+.python-version
