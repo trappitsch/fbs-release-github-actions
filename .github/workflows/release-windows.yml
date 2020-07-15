@@ -10,7 +10,7 @@ on:
 jobs:
   build:
     name: Upload Release Asset
-    runs-on: windows-latest
+    runs-on: windows-2019
     strategy:
       matrix:
         python-version: [3.6]
