@@ -30,9 +30,9 @@ jobs:
         run: echo ${{ steps.create_release.outputs.upload_url }} > release-info/path.txt
       - name: Store upload path in artifact
         uses: actions/upload-artifact@v1
-          with:
-            name: release-info
-            path: path.txt
+        with:
+          name: release-info
+          path: path.txt
       - name: Install fpm (required for fbs)
         run: |
           sudo apt-get install ruby ruby-dev rubygems build-essential
@@ -83,9 +83,9 @@ jobs:
           fbs freeze
           fbs installer
       - name: Get upload path for release from artifact
-          uses: actions/download-artifact@v1
-          with:
-            name: release-info
+        uses: actions/download-artifact@v1
+        with:
+          name: release-info
       - name: Upload Release Asset
         run: |
           path=`cat release-info/path.txt`
