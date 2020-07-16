@@ -85,7 +85,7 @@ jobs:
           overwrite: true
 
   build-windows:
-    name: Upload Release Asset
+    name: Upload Release Asset Windows
     runs-on: windows-latest
     strategy:
       matrix:

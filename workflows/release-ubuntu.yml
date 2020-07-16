@@ -14,8 +14,8 @@ jobs:
       matrix:
         python-version: [3.6]
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+        - name: Checkout code
+          uses: actions/checkout@v2
       - name: Install dependencies
         run: |
           sudo apt-get install ruby ruby-dev rubygems build-essential
@@ -41,6 +41,8 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
+          # body: ""  # release message, alternative to body_path
+          body_path: release_text.md  # uncomment if not used
           draft: false
           prerelease: false
       - name: Upload Release Asset
