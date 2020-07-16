@@ -110,18 +110,22 @@ can be found in:
 
 Every action in this tutorial starts with:
 
-    on:
-      push:
-        # Sequence of patterns matched against refs/tags
-        tags:
-        - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+```yaml
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+```
 
 This means that the action is executed whenever a tag is pushed.
 The tag must follow the general GitHub scheme, 
 e.g., `v0.0.5`.
 In the action, the part `'v*'` matches these tags.
 
-    name: Release Ubuntu
+```yaml
+name: Release Ubuntu
+```
 
 This next line is the name of the GitHub Action.
 This will also be the name that you get displayed
@@ -131,13 +135,15 @@ The next line named `jobs` now starts the individual jobs
 that should be performed whenever the action is triggered.
 For a single-OS release creation, this is only one job.
 
-    build:
-        name: Upload Release Asset
-        runs-on: ubuntu-latest
-        strategy:
-          matrix:
-            python-version: [3.6]
-            
+```yaml
+build:
+    name: Upload Release Asset
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6]
+```
+         
 The first (and here only) job is named build.
 First we supply the name of the job,
 then the operating system the job runs on.
@@ -154,11 +160,13 @@ denoted by the title `steps` in line 16.
 This first step simply uses a GitHub supplied action
 to check out our repository.
 
-    - name: Install dependencies
-    run: |
-      sudo apt-get install ruby ruby-dev rubygems build-essential
-      sudo gem install --no-document fpm
-      fpm --version
+```yaml
+- name: Install dependencies
+run: |
+  sudo apt-get install ruby ruby-dev rubygems build-essential
+  sudo gem install --no-document fpm
+  fpm --version
+```
 
 The second step will install the Linux dependencies.
 As you can see in the 
@@ -167,41 +175,47 @@ As you can see in the
 is installed following
 [these instructions](https://fpm.readthedocs.io/en/latest/installing.html).
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        
+```yaml
+- name: Set up Python ${{ matrix.python-version }}
+  uses: actions/setup-python@v2
+  with:
+    python-version: ${{ matrix.python-version }}
+- name: Install dependencies
+  run: |
+    python -m pip install --upgrade pip
+    pip install -r requirements.txt
+```
+      
 The third and fourth step now first set up the python environment,
 again using a GitHub provided action,
 and then install the dependencies
 that we have stored in the `requirements.txt` file.
 
-    - name: Run fbs and freeze application
-      run: |
-        fbs freeze
-        fbs installer
+```yaml
+- name: Run fbs and freeze application
+  run: |
+    fbs freeze
+    fbs installer
+```
 
 Step five now runs `fbs freeze` to create the package and then
 `fbs installer` to create the installer. 
 
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        # body: ""  # release message, alternative to body_path
-        body_path: release_text.md  # uncomment if not used
-        draft: false
-        prerelease: false
-        
+```yaml
+- name: Create Release
+  id: create_release
+  uses: actions/create-release@v1
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  with:
+    tag_name: ${{ github.ref }}
+    release_name: Release ${{ github.ref }}
+    # body: ""  # release message, alternative to body_path
+    body_path: release_text.md  # uncomment if not used
+    draft: false
+    prerelease: false
+```
+       
 The sixth step creates the release.
 More information and options about this can be found
 [here](https://github.com/actions/create-release).
@@ -212,16 +226,18 @@ pass this variable the filename (here `release_text.md`).
 Alternatively you can directly supply the text for the release
 using the (here commented out) `body` variable.
 
-    - name: Upload Release Asset
-      id: upload-release-asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-        asset_path: target/fbs_tutorial_app.deb
-        asset_name: fbs_tutorial_app.deb
-        asset_content_type: application/deb
+```yaml
+- name: Upload Release Asset
+  id: upload-release-asset
+  uses: actions/upload-release-asset@v1
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  with:
+    upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+    asset_path: target/fbs_tutorial_app.deb
+    asset_name: fbs_tutorial_app.deb
+    asset_content_type: application/deb
+```
 
 This final step now adds the created binaries to the release.
 Note that you must specify the correct path and file names here
@@ -277,14 +293,16 @@ Here it is created in the `build-linux` job.
 To upload the binaries to the asset,
 the following action is used:
 
-    - name: Upload binaries to release
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: target/fbs_tutorial_app.deb
-        asset_name: fbs_tutorial_app.deb
-        tag: ${{ github.ref }}
-        overwrite: true
+```yaml
+- name: Upload binaries to release
+  uses: svenstaro/upload-release-action@v2
+  with:
+    repo_token: ${{ secrets.GITHUB_TOKEN }}
+    file: target/fbs_tutorial_app.deb
+    asset_name: fbs_tutorial_app.deb
+    tag: ${{ github.ref }}
+    overwrite: true
+```
 
 Here, `file` is the name for the binary to be added
 and `asset_name` is the name of the file that will be
