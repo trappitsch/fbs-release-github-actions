@@ -91,7 +91,9 @@ about the differences.
 While the latter action is simpler to implement for the mulit-OS case,
 the former is an action that is directly supplied by GitHub Actions.
  
-*Note*: Only Ubuntu, macOS Catlina, and Windows Server 2009 releases
+*Note*: Only Ubuntu, macOS Catalina, 
+macOS BigSur, 
+and Windows Server 2019 releases
 are currently possible,
 since these are the potential environments that GitHub Actions run under.
 [Check here](https://docs.github.com/en/actions/reference/virtual-environments-for-github-hosted-runners#supported-runners-and-hardware-resources)
@@ -138,7 +140,7 @@ For a single-OS release creation, this is only one job.
 ```yaml
 build:
     name: Upload Release Asset
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-16.04
     strategy:
       matrix:
         python-version: [3.6]
@@ -147,6 +149,10 @@ build:
 The first (and here only) job is named build.
 First we supply the name of the job,
 then the operating system the job runs on.
+As pointed out in the 
+[PyInstaller docs](https://pyinstaller.readthedocs.io/en/stable/usage.html#making-gnu-linux-apps-forward-compatible),
+we want to use the oldest Linux available
+for GitHub Actions.
 Then we define the python versions that we want to use.
 For fbs, as currently required,
 we will use the latest supported version,
@@ -330,3 +336,9 @@ Please file a feature request as well.
 ## License
 
 MIT, see [license file](LICENSE).
+
+## Acknowledgements
+
+- [@Kastakin](https://github.com/Kastakin) for pointing out 
+  that the oldest available Linux version should be used
+  (Issue [#2](https://github.com/trappitsch/fbs-release-github-actions/issues/2))
