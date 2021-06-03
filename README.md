@@ -7,6 +7,12 @@ and how to automatically create installer on all platforms
 and a GitHub release using 
 [GitHub Actions](https://github.com/features/actions).
 
+**`fbs pro`**: If you have purchased `fbs pro`,
+check out [this documentation](fbs_pro_instructions.md)
+on how to modify the following workflows
+to use the download link that you have received
+in a secure manner.
+
 ## Project structure
 
 ### Python program
