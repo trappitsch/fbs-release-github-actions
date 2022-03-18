@@ -55,6 +55,7 @@ jobs:
           overwrite: true
 
   build-macos:
+    needs: build-linux
     name: Upload Release Asset macOS
     runs-on: macos-latest
     strategy:
@@ -85,6 +86,7 @@ jobs:
           overwrite: true
 
   build-windows:
+    needs: build-linux
     name: Upload Release Asset Windows
     runs-on: windows-latest
     strategy:
